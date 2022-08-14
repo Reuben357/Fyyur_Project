@@ -439,9 +439,8 @@ def edit_artist(artist_id):
 def edit_artist_submission(artist_id):
   # TODO: take values from the form submitted, and update existing
   # artist record with ID <artist_id> using the new attributes
-  error = False
   form_submited = ArtistForm(request.form)
-  if  form_submited.validate():
+  if not form_submited.validate():
     flash('An error occured in your input !')
     return render_template('forms/edit_artist.html', form=form_submited)
 
@@ -477,9 +476,8 @@ def edit_venue(venue_id):
 def edit_venue_submission(venue_id):
   # TODO: take values from the form submitted, and update existing
   # venue record with ID <venue_id> using the new attributes
-  error = False
   form_submited = VenueForm(request.form)
-  if form_submited.validate():
+  if not form_submited.validate():
     flash('An error occured in your input !')
     return render_template('forms/edit_venue.html', form=form_submited)
 
