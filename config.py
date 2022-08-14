@@ -10,5 +10,5 @@ DEBUG = True
 
 
 # TODO IMPLEMENT DATABASE URL
-SQLALCHEMY_DATABASE_URI = 'postgresql://postgres:password@localhost:5432/Fyyur' #postgresql://postgres@localhost:5432/Fyyur
+SQLALCHEMY_DATABASE_URI = 'postgresql://postgres:password@localhost:5432/Fyyur' #postgresql://postgres:password@localhost:5432/Fyyur
 #Instantiate the Model reps into the db with flask_migrate to connect to the table attributes in the db 
