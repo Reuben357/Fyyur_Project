@@ -248,35 +248,34 @@ def create_venue_submission():
   # TODO: on unsuccessful db insert, flash an error instead.
   # e.g., flash('An error occurred. Venue ' + data.name + ' could not be listed.')
 
-  name = request.form['name']
-  genres = request.form['genres']
-  city = request.form['city']
-  state = request.form['state']
-  address = request.form['address']
-  phone = request.form['phone']
-  website_link = request.form['website_link']
-  image_link = request.form['image_link']
-  facebook_link = request.form['facebook_link']
-  seeking_talent = request.form.get('seeking_talent')
-  seeking_talent = True  if seeking_talent else False
-  seeking_description = request.form['seeking_description']
+  error = False
+  try:
+    name = request.form['name']
+    genres = request.form['genres']
+    city = request.form['city']
+    state = request.form['state']
+    address = request.form['address']
+    phone = request.form['phone']
+    website_link = request.form['website_link']
+    image_link = request.form['image_link']
+    facebook_link = request.form['facebook_link']
+    seeking_talent = request.form.get('seeking_talent')
+    seeking_talent = True if seeking_talent else False
+    seeking_description = request.form['seeking_description']
 
-  venue = Venue(name=name, genres=genres, city=city, state=state, address=address, phone=phone,
+    venue = Venue(name=name, genres=genres, city=city, state=state, address=address, phone=phone,
                   website_link=website_link, image_link=image_link, facebook_link=facebook_link,
                   seeking_talent=seeking_talent, seeking_description=seeking_description)
-  db.session.add(venue)
-  db.session.commit()
+    db.session.add(venue)
+    db.session.commit()
 
-  # error = False
-  # try:
-  #
-  #   flash('Venue ' + request.form['name'] + ' was successfully listed!')
-  # except:
-  #   error = True
-  #   flash('An error occured.' + request.form['name'] + 'could not be listed.')
-  #   db.session.rollback()
-  # finally:
-  #   db.session.close()
+    flash('Venue ' + request.form['name'] + ' was successfully listed!')
+  except:
+    error = True
+    flash('An error occured.' + request.form['name'] + 'could not be listed.')
+    db.session.rollback()
+  finally:
+    db.session.close()
 
   # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
   return render_template('pages/home.html')
@@ -529,28 +528,28 @@ def create_show_submission():
   # called to create new shows in the db, upon submitting new show listing form
   # TODO: insert form data as a new Show record in the db, instead
 
-  artist_id = request.form['artist_id']
-  venue_id = request.form['venue_id']
-  start_time = request.form['start_time']
-  shows = Show(artist_id=artist_id, venue_id=venue_id, start_time=start_time)
 
-  db.session.add(shows)
-  db.session.commit()
 
-  # error = False
-  # try:
-  #
-  #   # on successful db insert, flash success
-  #   flash('Show was successfully listed!')
-  # except:
-  #   error= True
-  #   flash('An error occured. Show could not be listed.')
-  #   db.session.rollback()
-  # # TODO: on unsuccessful db insert, flash an error instead.
-  # # e.g., flash('An error occurred. Show could not be listed.')
-  # # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
-  # finally:
-  #   db.session.close()
+  error = False
+  try:
+    artist_id = request.form['artist_id']
+    venue_id = request.form['venue_id']
+    start_time = request.form['start_time']
+    shows = Show(artist_id=artist_id, venue_id=venue_id, start_time=start_time)
+
+    db.session.add(shows)
+    db.session.commit()
+    # on successful db insert, flash success
+    flash('Show was successfully listed!')
+  except:
+    error= True
+    flash('An error occured. Show could not be listed.')
+    db.session.rollback()
+  # TODO: on unsuccessful db insert, flash an error instead.
+  # e.g., flash('An error occurred. Show could not be listed.')
+  # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
+  finally:
+    db.session.close()
   return render_template('pages/home.html')
 
 @app.errorhandler(404)
