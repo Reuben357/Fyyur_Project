@@ -12,6 +12,9 @@ from flask import Flask, render_template, request, flash, redirect, url_for
 from flask_migrate import Migrate
 from flask_moment import Moment
 from flask_sqlalchemy import SQLAlchemy
+from models import (Artist, Venue, Show)
+
+
 
 from forms import *
 
@@ -28,106 +31,19 @@ migrate = Migrate(app, db)
 # TODO: connect to a local postgresql database
 
 #----------------------------------------------------------------------------#
-# Models.
-#----------------------------------------------------------------------------#
-
-class Venue(db.Model):
-    __tablename__ = 'Venue'
-
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
-    city = db.Column(db.String(120))
-    state = db.Column(db.String(120))
-    address = db.Column(db.String(120))
-    phone = db.Column(db.String(120))
-    genres = db.Column(db.String(120))
-    image_link = db.Column(db.String(500))
-    website_link = db.Column(db.String(120))
-    facebook_link = db.Column(db.String(120))
-    seeking_talent = db.Column(db.Boolean, default=False)
-    seeking_description = db.Column(db.String)
-    shows = db.relationship("Show")
-
-    def to_json(self):
-      return {
-
-        "id": self.id,
-        "name": self.name,
-        "city": self.city,
-        "state": self.state,
-        "address": self.address,
-        "phone": self.phone,
-        "genres": self.genres.split(","),
-        "image_link": self.image_link,
-        "website_link": self.website_link,
-        "facebook_link": self.facebook_link,
-        "seeking_talent": self.seeking_talent,
-        "seeking_description": self.seeking_description,
-      }
-
-    def past_shows(self):
-      today = datetime.now()
-      return Show.query.join(Venue).filter(Show.venue_id == self.id).filter(Show.start_time<today).all()
-
-    def upcoming_shows(self):
-      today = datetime.now()
-      return Show.query.join(Venue).filter(Show.venue_id == self.id).filter(Show.start_time>today).all()
-
-
-    # TODO: implement any missing fields, as a database migration using Flask-Migrate
-
-class Artist(db.Model):
-    __tablename__ = 'Artist'
-
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
-    city = db.Column(db.String(120))
-    state = db.Column(db.String(120))
-    phone = db.Column(db.String(120))
-    genres = db.Column(db.String(120))
-    image_link = db.Column(db.String(500))
-    website_link = db.Column(db.String(120))
-    facebook_link = db.Column(db.String(120))
-    seeking_venue  = db.Column(db.Boolean, default=False)
-    seeking_description = db.Column(db.String)
-    shows = db.relationship('Show', lazy=True)
-
-    # TODO: implement any missing fields, as a database migration using Flask-Migrate
-
-# TODO Implement Show and Artist models, and complete all model relationships and properties, as a database migration.
-
-class Show(db.Model):
-  __tablename__ = 'Show'
-
-  id = db.Column(db.Integer, primary_key=True)
-  start_time = db.Column(db.DateTime)
-
-  venue_id = db.Column(db.Integer, db.ForeignKey("Venue.id"))
-  venue = db.relationship("Venue", backref="venue_shows")
-
-  artist_id = db.Column(db.Integer, db.ForeignKey("Artist.id"))
-  artist = db.relationship("Artist", backref="artist_shows")
-
-  def to_json(self):
-    return {
-      "artist_id": self.artist.id,
-      "artist_name": self.artist.name,
-      "artist_image_link": self.artist.image_link,
-      "start_time": self.start_time.strftime("%m/%d/%Y, %H:%M:%S")
-    }
-
-
-
-#----------------------------------------------------------------------------#
 # Filters.
 #----------------------------------------------------------------------------#
 
 def format_datetime(value, format='medium'):
-  date = dateutil.parser.parse(value)
+  if isinstance(value, str):
+    date = dateutil.parser.parse(value)
+  else:
+    date = value
   if format == 'full':
       format="EEEE MMMM, d, y 'at' h:mma"
   elif format == 'medium':
       format="EE MM, dd, y h:mma"
+
   return babel.dates.format_datetime(date, format, locale='en')
 
 app.jinja_env.filters['datetime'] = format_datetime
@@ -247,11 +163,16 @@ def create_venue_submission():
   # on successful db insert, flash success
   # TODO: on unsuccessful db insert, flash an error instead.
   # e.g., flash('An error occurred. Venue ' + data.name + ' could not be listed.')
-
   error = False
+  form = VenueForm(request.form)
+  if form.validate():
+    flash('The form was filed succesfully created')
+  # else:
+  #   flash('An error occured, Check below')
+  #   return render_template('forms/new_venue.html', form=form)
   try:
     name = request.form['name']
-    genres = request.form['genres']
+    genres = request.form.getlist('genres')
     city = request.form['city']
     state = request.form['state']
     address = request.form['address']
@@ -268,7 +189,7 @@ def create_venue_submission():
                   seeking_talent=seeking_talent, seeking_description=seeking_description)
     db.session.add(venue)
     db.session.commit()
-
+    print(ValidationError)
     flash('Venue ' + request.form['name'] + ' was successfully listed!')
   except:
     error = True
@@ -357,6 +278,11 @@ def show_artist(artist_id):
         }
       print(f"Show start time: {show.start_time}")
 
+      if show.start_time < datetime.now():
+        past_shows.append(shows)
+      else:
+        upcoming_shows.append(shows)
+
     data = {
       "id": artists.id,
       "name": artists.name,
@@ -368,6 +294,10 @@ def show_artist(artist_id):
       "facebook_link": artists.facebook_link,
       "seeking_description": artists.seeking_description,
       "image_link": artists.image_link,
+      'past_shows': past_shows,
+      'upcoming_shows': upcoming_shows,
+      'past_shows_count': len(past_shows),
+      'upcoming_shows_count': len(upcoming_shows)
     }
   else:
     flash("Artist does not exist.")
@@ -390,23 +320,30 @@ def edit_artist(artist_id):
 def edit_artist_submission(artist_id):
   # TODO: take values from the form submitted, and update existing
   # artist record with ID <artist_id> using the new attributes
+  error = False
   form_submited = ArtistForm(request.form)
   if  not form_submited.validate():
     flash('An error occured in your input !')
     return render_template('forms/edit_artist.html', form=form_submited)
+  try:
+    artists = Artist.query.get(artist_id)
+    artists.name = request.form['name']
+    artists.city = request.form['city']
+    artists.state = request.form['state']
+    artists.phone = request.form['phone']
+    artists.facebook_link = request.form['facebook_link']
+    artists.image_link = request.form['image_link']
+    artists.website_link = request.form['website_link']
 
-  artists = Artist.query.get(artist_id)
-
-  artists.name = request.form['name']
-  artists.city = request.form['city']
-  artists.state = request.form['state']
-  artists.phone = request.form['phone']
-  artists.facebook_link = request.form['facebook_link']
-  artists.image_link = request.form['image_link']
-  artists.website_link = request.form['website_link']
-
-  db.session.add(artists)
-  db.session.commit()
+    db.session.add(artists)
+    db.session.commit()
+    flash('Artist' + request.form['name'] + 'was successfully edited')
+  except:
+    error = True
+    flash('An error occurred. Artist'+ request.form['name'] + 'could not be edited.')
+    db.session.rollback()
+  finally:
+    db.session.close()
 
   return redirect(url_for('show_artist', artist_id=artist_id))
 
@@ -427,25 +364,33 @@ def edit_venue(venue_id):
 def edit_venue_submission(venue_id):
   # TODO: take values from the form submitted, and update existing
   # venue record with ID <venue_id> using the new attributes
+  error = False
   form_submited = VenueForm(request.form)
   if not form_submited.validate():
     flash('An error occured in your input !')
     return render_template('forms/edit_venue.html', form=form_submited)
 
-  venues = Venue.query.get(venue_id)
+  try:
+    venues = Venue.query.get(venue_id)
+    venues.name = request.form['name']
+    venues.genres = request.form.getlist('genres')
+    venues.city = request.form['city']
+    venues.state = request.form['state']
+    venues.address = request.form['address']
+    venues.phone = request.form['phone']
+    venues.website_link = request.form['website_link']
+    venues.image_link = request.form['image_link']
+    venues.facebook_link = request.form['facebook_link']
 
-  venues.name = request.form['name']
-  venues.genres = request.form['genres']
-  venues.city = request.form['city']
-  venues.state = request.form['state']
-  venues.address = request.form['address']
-  venues.phone = request.form['phone']
-  venues.website_link = request.form['website_link']
-  venues.image_link = request.form['image_link']
-  venues.facebook_link = request.form['facebook_link']
-
-  db.session.add(venues)
-  db.session.commit()
+    db.session.add(venues)
+    db.session.commit()
+    flash('Venue' + request.form['name'] + 'was successfully edited!')
+  except:
+    error =True
+    flash('An error occured. Venue' + request.form['name'] + 'could not be edited.')
+    db.session.rollback()
+  finally:
+    db.session.close()
 
   return redirect(url_for('show_venue', venue_id=venue_id))
 
@@ -462,9 +407,14 @@ def create_artist_submission():
   # called upon submitting the new artist listing form
   # TODO: insert form data as a new Venue record in the db, instead
   error = False
+  # if form.validate():
+  #   flash('The form was filed succesfully')
+  # else:
+  #   flash('An error occured, Bad Input,Try again')
+  #   return render_template('forms/new_artist.html', form=form)
   try:
     name = request.form['name']
-    genres = request.form['genres']
+    genres = request.form.getlist('genres')
     city = request.form['city']
     state = request.form['state']
     phone = request.form['phone']
@@ -527,8 +477,6 @@ def create_shows():
 def create_show_submission():
   # called to create new shows in the db, upon submitting new show listing form
   # TODO: insert form data as a new Show record in the db, instead
-
-
 
   error = False
   try:

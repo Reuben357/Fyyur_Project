@@ -1,1 +1,62 @@
 
+2022-08-20 18:48:28,833 INFO: errors [in /home/reuben/FSND/projects/01_fyyur/starter_code/app.py:519]
+2022-08-20 18:52:25,732 INFO: errors [in /home/reuben/FSND/projects/01_fyyur/starter_code/app.py:519]
+2022-08-20 18:52:32,361 INFO: errors [in /home/reuben/FSND/projects/01_fyyur/starter_code/app.py:519]
+2022-08-20 18:54:07,341 INFO: errors [in app.py:519]
+2022-08-20 18:54:13,531 ERROR: Exception on /venues [GET] [in /home/reuben/FSND/projects/01_fyyur/starter_code/env/lib/python3.8/site-packages/flask/app.py:1741]
+Traceback (most recent call last):
+  File "/home/reuben/FSND/projects/01_fyyur/starter_code/env/lib/python3.8/site-packages/flask/app.py", line 2525, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/reuben/FSND/projects/01_fyyur/starter_code/env/lib/python3.8/site-packages/flask/app.py", line 1822, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/reuben/FSND/projects/01_fyyur/starter_code/env/lib/python3.8/site-packages/flask/app.py", line 1820, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/reuben/FSND/projects/01_fyyur/starter_code/env/lib/python3.8/site-packages/flask/app.py", line 1796, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+  File "app.py", line 68, in venues
+    all_venues = Venue.query.all()
+NameError: name 'Venue' is not defined
+2022-08-20 18:54:19,029 ERROR: Exception on /artists [GET] [in /home/reuben/FSND/projects/01_fyyur/starter_code/env/lib/python3.8/site-packages/flask/app.py:1741]
+Traceback (most recent call last):
+  File "/home/reuben/FSND/projects/01_fyyur/starter_code/env/lib/python3.8/site-packages/flask/app.py", line 2525, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/reuben/FSND/projects/01_fyyur/starter_code/env/lib/python3.8/site-packages/flask/app.py", line 1822, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/reuben/FSND/projects/01_fyyur/starter_code/env/lib/python3.8/site-packages/flask/app.py", line 1820, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/reuben/FSND/projects/01_fyyur/starter_code/env/lib/python3.8/site-packages/flask/app.py", line 1796, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+  File "app.py", line 227, in artists
+    artists = Artist.query.all()
+NameError: name 'Artist' is not defined
+2022-08-20 18:54:49,242 ERROR: Exception on /artists [GET] [in /home/reuben/FSND/projects/01_fyyur/starter_code/env/lib/python3.8/site-packages/flask/app.py:1741]
+Traceback (most recent call last):
+  File "/home/reuben/FSND/projects/01_fyyur/starter_code/env/lib/python3.8/site-packages/flask/app.py", line 2525, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/reuben/FSND/projects/01_fyyur/starter_code/env/lib/python3.8/site-packages/flask/app.py", line 1822, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/reuben/FSND/projects/01_fyyur/starter_code/env/lib/python3.8/site-packages/flask/app.py", line 1820, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/reuben/FSND/projects/01_fyyur/starter_code/env/lib/python3.8/site-packages/flask/app.py", line 1796, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+  File "app.py", line 227, in artists
+    artists = Artist.query.all()
+NameError: name 'Artist' is not defined
+2022-08-20 19:01:26,160 ERROR: Exception on /artists [GET] [in /home/reuben/FSND/projects/01_fyyur/starter_code/env/lib/python3.8/site-packages/flask/app.py:1741]
+Traceback (most recent call last):
+  File "/home/reuben/FSND/projects/01_fyyur/starter_code/env/lib/python3.8/site-packages/flask/app.py", line 2525, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/reuben/FSND/projects/01_fyyur/starter_code/env/lib/python3.8/site-packages/flask/app.py", line 1822, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/reuben/FSND/projects/01_fyyur/starter_code/env/lib/python3.8/site-packages/flask/app.py", line 1820, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/reuben/FSND/projects/01_fyyur/starter_code/env/lib/python3.8/site-packages/flask/app.py", line 1796, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+  File "app.py", line 227, in artists
+    data = []
+NameError: name 'Artist' is not defined
+2022-08-20 19:03:01,074 INFO: errors [in app.py:520]
+2022-08-20 19:06:24,183 INFO: errors [in /home/reuben/FSND/projects/01_fyyur/starter_code/app.py:520]
+2022-08-20 19:06:31,692 INFO: errors [in /home/reuben/FSND/projects/01_fyyur/starter_code/app.py:520]
+2022-08-20 19:06:35,701 INFO: errors [in /home/reuben/FSND/projects/01_fyyur/starter_code/app.py:520]
+2022-08-20 19:06:54,878 INFO: errors [in /home/reuben/FSND/projects/01_fyyur/starter_code/app.py:520]
